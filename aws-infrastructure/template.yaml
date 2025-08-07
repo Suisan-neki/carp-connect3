@@ -1,0 +1,350 @@
+AWSTemplateFormatVersion: \'2010-09-09\'
+Transform: AWS::Serverless-2016-10-31
+Description: \'カープコネクト - AWSサーバーレスアーキテクチャ\'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: 環境名
+  
+  CognitoDomainPrefix:
+    Type: String
+    Default: carp-connect-dev
+    Description: Cognito ドメインプレフィックス
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.11
+    Environment:
+      Variables:
+        ENVIRONMENT: !Ref Environment
+        USER_POOL_ID: !Ref CarpConnectUserPool
+        USER_POOL_CLIENT_ID: !Ref CarpConnectUserPoolClient
+        POSTS_TABLE: !Ref PostsTable
+        USERS_TABLE: !Ref UsersTable
+        MESSAGES_TABLE: !Ref MessagesTable
+
+Resources:
+  # Cognito User Pool
+  CarpConnectUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub \'carp-connect-${Environment}\'
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+      AutoVerifiedAttributes:
+        - email
+        - phone_number
+      UsernameAttributes:
+        - email
+        - phone_number
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        - Name: phone_number
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        - Name: name
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        - Name: birthdate
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        - Name: location
+          AttributeDataType: String
+          Required: false
+          Mutable: true
+        - Name: favorite_player
+          AttributeDataType: String
+          Required: false
+          Mutable: true
+      UserPoolTags:
+        Project: CarpConnect
+        Environment: !Ref Environment
+
+  # Cognito User Pool Client
+  CarpConnectUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref CarpConnectUserPool
+      ClientName: !Sub \'carp-connect-client-${Environment}\'
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+      SupportedIdentityProviders:
+        - COGNITO
+      CallbackURLs:
+        - http://localhost:3000
+        - https://main.d1234567890.amplifyapp.com
+      LogoutURLs:
+        - http://localhost:3000
+        - https://main.d1234567890.amplifyapp.com
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      AllowedOAuthFlowsUserPoolClient: true
+
+  # Cognito User Pool Domain
+  CarpConnectUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref CognitoDomainPrefix
+      UserPoolId: !Ref CarpConnectUserPool
+
+  # DynamoDB Tables
+  PostsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub \'carp-connect-posts-${Environment}\'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: S
+        - AttributeName: category
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: CategoryIndex
+          KeySchema:
+            - AttributeName: category
+              KeyType: HASH
+            - AttributeName: created_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Project
+          Value: CarpConnect
+        - Key: Environment
+          Value: !Ref Environment
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub \'carp-connect-users-${Environment}\'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: EmailIndex
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Project
+          Value: CarpConnect
+        - Key: Environment
+          Value: !Ref Environment
+
+  MessagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub \'carp-connect-messages-${Environment}\'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: conversation_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: conversation_id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: UserIndex
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: timestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Project
+          Value: CarpConnect
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Lambda Functions
+  CarpConnectApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub \'carp-connect-api-${Environment}\'
+      CodeUri: ../backend/carp-connect-api/
+      Handler: src.lambda_handler.lambda_handler
+      Environment:
+        Variables:
+          POSTS_TABLE: !Ref PostsTable
+          USERS_TABLE: !Ref UsersTable
+          MESSAGES_TABLE: !Ref MessagesTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PostsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MessagesTable
+        - Version: \'2012-10-17\'
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminGetUser
+                - cognito-idp:AdminCreateUser
+                - cognito-idp:AdminUpdateUserAttributes
+              Resource: !GetAtt CarpConnectUserPool.Arn
+      Events:
+        ApiGateway:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarpConnectApi
+            Path: /{proxy+}
+            Method: ANY
+
+  # API Gateway
+  CarpConnectApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub \'carp-connect-api-${Environment}\'
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "\'GET,POST,PUT,DELETE,OPTIONS\'"
+        AllowHeaders: "\'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token\'"
+        AllowOrigin: "\'*\'"
+        MaxAge: "\'600\'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt CarpConnectUserPool.Arn
+        AddDefaultAuthorizerToCorsPreflight: false
+      DefinitionBody:
+        swagger: \'2.0\'
+        info:
+          title: !Sub \'carp-connect-api-${Environment}\'
+          version: \'1.0\'
+        paths:
+          /{proxy+}:
+            x-amazon-apigateway-any-method:
+              x-amazon-apigateway-integration:
+                type: aws_proxy
+                httpMethod: POST
+                uri: !Sub \'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CarpConnectApiFunction.Arn}/invocations\'
+              responses: {}
+
+  # S3 Bucket for file storage
+  CarpConnectFilesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub \'carp-connect-files-${Environment}-${AWS::AccountId}\'
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: [\'*\']
+            AllowedMethods: [GET, PUT, POST, DELETE, HEAD]
+            AllowedOrigins: [\'*\']
+            MaxAge: 3000
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      Tags:
+        - Key: Project
+          Value: CarpConnect
+        - Key: Environment
+          Value: !Ref Environment
+
+  # S3 Bucket Policy
+  CarpConnectFilesBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CarpConnectFilesBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: \'*\'
+            Action: s3:GetObject
+            Resource: !Sub \'${CarpConnectFilesBucket}/*\'
+
+Outputs:
+  UserPoolId:
+    Description: \'Cognito User Pool ID\'
+    Value: !Ref CarpConnectUserPool
+    Export:
+      Name: !Sub \'${AWS::StackName}-UserPoolId\'
+
+  UserPoolClientId:
+    Description: \'Cognito User Pool Client ID\'
+    Value: !Ref CarpConnectUserPoolClient
+    Export:
+      Name: !Sub \'${AWS::StackName}-UserPoolClientId\'
+
+  UserPoolDomain:
+    Description: \'Cognito User Pool Domain\'
+    Value: !Sub \'https://${CognitoDomainPrefix}.auth.${AWS::Region}.amazoncognito.com\'
+    Export:
+      Name: !Sub \'${AWS::StackName}-UserPoolDomain\'
+
+  ApiGatewayUrl:
+    Description: \'API Gateway URL\'
+    Value: !Sub \'https://${CarpConnectApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}\'
+    Export:
+      Name: !Sub \'${AWS::StackName}-ApiGatewayUrl\'
+
+  S3BucketName:
+    Description: \'S3 Bucket for file storage\'
+    Value: !Ref CarpConnectFilesBucket
+    Export:
+      Name: !Sub \'${AWS::StackName}-S3BucketName\'
+
+  PostsTableName:
+    Description: \'DynamoDB Posts Table Name\'
+    Value: !Ref PostsTable
+    Export:
+      Name: !Sub \'${AWS::StackName}-PostsTableName\'
+
+  UsersTableName:
+    Description: \'DynamoDB Users Table Name\'
+    Value: !Ref UsersTable
+    Export:
+      Name: !Sub \'${AWS::StackName}-UsersTableName\'
+
+  MessagesTableName:
+    Description: \'DynamoDB Messages Table Name\'
+    Value: !Ref MessagesTable
+    Export:
+      Name: !Sub \'${AWS::StackName}-MessagesTableName\'
+
