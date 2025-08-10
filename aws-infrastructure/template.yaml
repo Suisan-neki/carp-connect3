@@ -240,10 +240,10 @@ Resources:
       Name: !Sub \'carp-connect-api-${Environment}\'
       StageName: !Ref Environment
       Cors:
-        AllowMethods: "\'GET,POST,PUT,DELETE,OPTIONS\'"
-        AllowHeaders: "\'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token\'"
-        AllowOrigin: "\'*\'"
-        MaxAge: "\'600\'"
+        AllowMethods: "GET,POST,PUT,DELETE,OPTIONS"
+        AllowHeaders: "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+        AllowOrigins: "'*'"
+        MaxAge: 600
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
         Authorizers:
