@@ -1,17 +1,18 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  Carp Connect - AWS Serverless Architecture
+Description: 'Carp Connect - AWS Serverless Architecture'
 
 Parameters:
   Environment:
     Type: String
     Default: dev
     AllowedValues: [dev, staging, prod]
-
+    Description: Environment name
+  
   CognitoDomainPrefix:
     Type: String
     Default: carp-connect-dev
+    Description: Cognito domain prefix
 
 Globals:
   Function:
