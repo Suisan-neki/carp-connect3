@@ -99,7 +99,7 @@ Resources:
         - ALLOW_USER_PASSWORD_AUTH
       SupportedIdentityProviders:
         - COGNITO
-      CallbackURLs:
+      CallbackURLs: 
         - http://localhost:3000
         - https://main.d1234567890.amplifyapp.com
       LogoutURLs:
@@ -209,7 +209,39 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
 
-  # Lambda Functions
+  # Custom IAM Role for CarpConnectApiFunction
+  CarpConnectApiFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole # Basic Lambda logs permission
+
+  # Custom IAM Policy for Cognito permissions
+  CarpConnectApiFunctionCognitoPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CarpConnectApiFunctionCognitoPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - cognito-idp:AdminGetUser
+              - cognito-idp:AdminCreateUser
+              - cognito-idp:AdminUpdateUserAttributes
+            Resource: !GetAtt CarpConnectUserPool.Arn # Use the specific ARN here
+      Roles:
+        - !Ref CarpConnectApiFunctionRole # Attach to the custom role
+
+  # Lambda Function (now uses custom role)
   CarpConnectApiFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -223,24 +255,7 @@ Resources:
           POSTS_TABLE: !Ref PostsTable
           USERS_TABLE: !Ref UsersTable
           MESSAGES_TABLE: !Ref MessagesTable
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref PostsTable
-        - DynamoDBCrudPolicy:
-            TableName: !Ref UsersTable
-        - DynamoDBCrudPolicy:
-            TableName: !Ref MessagesTable
-        - Policy:
-            PolicyName: CognitoUserManagementPolicy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - cognito-idp:AdminGetUser
-                    - cognito-idp:AdminCreateUser
-                    - cognito-idp:AdminUpdateUserAttributes
-                  Resource: !GetAtt CarpConnectUserPool.Arn
+      Role: !GetAtt CarpConnectApiFunctionRole.Arn # Assign the custom role
       Events:
         ApiGateway:
           Type: Api
@@ -267,10 +282,10 @@ Resources:
             UserPoolArn: !GetAtt CarpConnectUserPool.Arn
         AddDefaultAuthorizerToCorsPreflight: false
       DefinitionBody:
-        swagger: '''2.0'''
+        swagger: '2.0'
         info:
           title: !Sub 'carp-connect-api-${Environment}'
-          version: '''1.0'''
+          version: '1.0'
         paths:
           /{proxy+}:
             x-amazon-apigateway-any-method:

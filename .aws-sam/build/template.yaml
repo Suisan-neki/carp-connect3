@@ -242,20 +242,19 @@ Resources:
       - DynamoDBCrudPolicy:
           TableName:
             Ref: MessagesTable
-      - Policy:
-          PolicyName: CognitoUserManagementPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-            - Effect: Allow
-              Action:
-              - cognito-idp:AdminGetUser
-              - cognito-idp:AdminCreateUser
-              - cognito-idp:AdminUpdateUserAttributes
-              Resource:
-                Fn::GetAtt:
-                - CarpConnectUserPool
-                - Arn
+      - PolicyName: CognitoUserManagementPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - cognito-idp:AdminGetUser
+            - cognito-idp:AdminCreateUser
+            - cognito-idp:AdminUpdateUserAttributes
+            Resource:
+              Fn::GetAtt:
+              - CarpConnectUserPool
+              - Arn
       Events:
         ApiGateway:
           Type: Api

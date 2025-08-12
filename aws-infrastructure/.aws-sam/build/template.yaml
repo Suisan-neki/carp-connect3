@@ -17,7 +17,7 @@ Parameters:
 Globals:
   Function:
     Timeout: 30
-    Runtime: python3.11
+    Runtime: python3.13
     Environment:
       Variables:
         ENVIRONMENT:
@@ -33,6 +33,18 @@ Globals:
         MESSAGES_TABLE:
           Ref: MessagesTable
 Resources:
+  AppDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName:
+        Fn::Sub: carp-connect-dependencies-${Environment}
+      Description: Python dependencies for the Carp Connect API
+      ContentUri: ..\..\..\backend\lambda_layer
+      CompatibleRuntimes:
+      - python3.13
+      LicenseInfo: MIT
+      RetentionPolicy: Retain
+    BuildMethod: python3.13
   CarpConnectUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -203,32 +215,25 @@ Resources:
       - Key: Environment
         Value:
           Ref: Environment
-  CarpConnectApiFunction:
-    Type: AWS::Serverless::Function
+  CarpConnectApiFunctionRole:
+    Type: AWS::IAM::Role
     Properties:
-      FunctionName:
-        Fn::Sub: carp-connect-api-${Environment}
-      CodeUri: CarpConnectApiFunction
-      Handler: src.lambda_handler.lambda_handler
-      Environment:
-        Variables:
-          POSTS_TABLE:
-            Ref: PostsTable
-          USERS_TABLE:
-            Ref: UsersTable
-          MESSAGES_TABLE:
-            Ref: MessagesTable
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: PostsTable
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: UsersTable
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: MessagesTable
-      - Version: '2012-10-17'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  CarpConnectApiFunctionCognitoPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CarpConnectApiFunctionCognitoPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
         Statement:
         - Effect: Allow
           Action:
@@ -239,6 +244,29 @@ Resources:
             Fn::GetAtt:
             - CarpConnectUserPool
             - Arn
+      Roles:
+      - Ref: CarpConnectApiFunctionRole
+  CarpConnectApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: carp-connect-api-${Environment}
+      CodeUri: CarpConnectApiFunction
+      Handler: lambda_handler.lambda_handler
+      Layers:
+      - Ref: AppDependenciesLayer
+      Environment:
+        Variables:
+          POSTS_TABLE:
+            Ref: PostsTable
+          USERS_TABLE:
+            Ref: UsersTable
+          MESSAGES_TABLE:
+            Ref: MessagesTable
+      Role:
+        Fn::GetAtt:
+        - CarpConnectApiFunctionRole
+        - Arn
       Events:
         ApiGateway:
           Type: Api
@@ -326,7 +354,7 @@ Resources:
           Principal: '*'
           Action: s3:GetObject
           Resource:
-            Fn::Sub: ${CarpConnectFilesBucket}/*
+            Fn::Sub: arn:aws:s3:::${CarpConnectFilesBucket}/*
 Outputs:
   UserPoolId:
     Description: Cognito User Pool ID
