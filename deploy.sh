@@ -67,6 +67,6 @@ EOF
 echo "Environment file (.env.local) generated."
 echo "Deployment complete!"
 echo "Application URL: http://localhost:3000 (local development)"
-echo "API URL: ${API_GATEWAY_URL}"
+echo "API URL: ${API_GATEWAY_URL}${NC}"
 
 cd ../..
