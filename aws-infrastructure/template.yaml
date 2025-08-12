@@ -28,6 +28,19 @@ Globals:
         MESSAGES_TABLE: !Ref MessagesTable
 
 Resources:
+  # Lambda Layer for Dependencies
+  AppDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub 'carp-connect-dependencies-${Environment}'
+      Description: Python dependencies for the Carp Connect API
+      ContentUri: ../backend/lambda_layer/
+      CompatibleRuntimes:
+        - python3.13
+      LicenseInfo: 'MIT'
+      RetentionPolicy: Retain
+    BuildMethod: python3.13
+
   # Cognito User Pool
   CarpConnectUserPool:
     Type: AWS::Cognito::UserPool
@@ -202,7 +215,9 @@ Resources:
     Properties:
       FunctionName: !Sub 'carp-connect-api-${Environment}'
       CodeUri: ../backend/carp-connect-api/
-      Handler: src.lambda_handler.lambda_handler
+      Handler: lambda_handler.lambda_handler
+      Layers:
+        - !Ref AppDependenciesLayer
       Environment:
         Variables:
           POSTS_TABLE: !Ref PostsTable
@@ -215,14 +230,17 @@ Resources:
             TableName: !Ref UsersTable
         - DynamoDBCrudPolicy:
             TableName: !Ref MessagesTable
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - cognito-idp:AdminGetUser
-                - cognito-idp:AdminCreateUser
-                - cognito-idp:AdminUpdateUserAttributes
-              Resource: !GetAtt CarpConnectUserPool.Arn
+        - Policy:
+            PolicyName: CognitoUserManagementPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - cognito-idp:AdminGetUser
+                    - cognito-idp:AdminCreateUser
+                    - cognito-idp:AdminUpdateUserAttributes
+                  Resource: !GetAtt CarpConnectUserPool.Arn
       Events:
         ApiGateway:
           Type: Api
@@ -249,10 +267,10 @@ Resources:
             UserPoolArn: !GetAtt CarpConnectUserPool.Arn
         AddDefaultAuthorizerToCorsPreflight: false
       DefinitionBody:
-        swagger: '2.0'
+        swagger: '''2.0'''
         info:
           title: !Sub 'carp-connect-api-${Environment}'
-          version: '1.0'
+          version: '''1.0'''
         paths:
           /{proxy+}:
             x-amazon-apigateway-any-method:
@@ -295,7 +313,7 @@ Resources:
             Effect: Allow
             Principal: '*'
             Action: s3:GetObject
-            Resource: !Sub '${CarpConnectFilesBucket}/*'
+            Resource: !Sub 'arn:aws:s3:::${CarpConnectFilesBucket}/*'
 
 Outputs:
   UserPoolId:
