@@ -7,7 +7,10 @@ import {
   Heart,
   MapPin,
   Clock,
-  Star
+  Star,
+  Plus,
+  Search,
+  Ticket
 } from 'lucide-react';
 
 export default function Dashboard({ user }) {
@@ -67,63 +70,73 @@ export default function Dashboard({ user }) {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 carp-fade-in">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">
-          おかえりなさい、{user?.attributes?.name || user?.username}さん！
-        </h1>
-        <p className="text-red-100">
-          今日もカープと一緒に素晴らしい一日を過ごしましょう⚾
-        </p>
+      <div className="carp-card">
+        <div className="carp-card-header">
+          <h1 className="text-2xl font-bold">
+            おかえりなさい、{user?.attributes?.name || user?.username}さん！
+          </h1>
+          <p className="text-red-100 mt-2">
+            今日もカープと一緒に素晴らしい一日を過ごしましょう⚾
+          </p>
+        </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <MessageSquare className="h-6 w-6 text-red-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">投稿数</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalPosts}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Users className="h-6 w-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">カープ仲間</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalFriends}</p>
+        <div className="carp-card">
+          <div className="carp-card-content">
+            <div className="flex items-center">
+              <div className="p-3 bg-red-50 rounded-xl">
+                <MessageSquare className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">投稿数</p>
+                <p className="text-2xl font-bold carp-text-red">{stats.totalPosts}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">今後の試合</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.upcomingGames}</p>
+        <div className="carp-card">
+          <div className="carp-card-content">
+            <div className="flex items-center">
+              <div className="p-3 bg-red-50 rounded-xl">
+                <Users className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">カープ仲間</p>
+                <p className="text-2xl font-bold carp-text-red">{stats.totalFriends}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-yellow-600" />
+        <div className="carp-card">
+          <div className="carp-card-content">
+            <div className="flex items-center">
+              <div className="p-3 bg-red-50 rounded-xl">
+                <Calendar className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">今後の試合</p>
+                <p className="text-2xl font-bold carp-text-red">{stats.upcomingGames}</p>
+              </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">今季勝利数</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.carpWins}</p>
+          </div>
+        </div>
+
+        <div className="carp-card">
+          <div className="carp-card-content">
+            <div className="flex items-center">
+              <div className="p-3 bg-red-50 rounded-xl">
+                <TrendingUp className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">今季勝利数</p>
+                <p className="text-2xl font-bold carp-text-red">{stats.carpWins}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -132,13 +145,13 @@ export default function Dashboard({ user }) {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Posts */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">最新の投稿</h2>
+        <div className="carp-card">
+          <div className="carp-card-header">
+            <h2 className="text-lg font-semibold">最新の投稿</h2>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="carp-card-content space-y-4">
             {recentPosts.map((post) => (
-              <div key={post.id} className="border-b pb-4 last:border-b-0">
+              <div key={post.id} className="border-b border-gray-100 pb-4 last:border-b-0">
                 <div className="flex items-start space-x-3">
                   <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                     <Heart className="h-4 w-4 text-red-600" />
@@ -150,11 +163,11 @@ export default function Dashboard({ user }) {
                     </div>
                     <p className="text-gray-700 mt-1">{post.content}</p>
                     <div className="flex items-center mt-2 space-x-4">
-                      <button className="flex items-center space-x-1 text-gray-500 hover:text-red-600">
+                      <button className="flex items-center space-x-1 text-gray-500 hover:text-red-600 transition-colors">
                         <Heart className="h-4 w-4" />
                         <span className="text-sm">{post.likes}</span>
                       </button>
-                      <button className="text-sm text-gray-500 hover:text-red-600">
+                      <button className="text-sm text-gray-500 hover:text-red-600 transition-colors">
                         返信
                       </button>
                     </div>
@@ -162,20 +175,20 @@ export default function Dashboard({ user }) {
                 </div>
               </div>
             ))}
-            <button className="w-full text-center text-red-600 hover:text-red-700 font-medium py-2">
+            <button className="carp-btn carp-btn-ghost w-full">
               もっと見る
             </button>
           </div>
         </div>
 
         {/* Upcoming Games */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">今後の試合予定</h2>
+        <div className="carp-card">
+          <div className="carp-card-header">
+            <h2 className="text-lg font-semibold">今後の試合予定</h2>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="carp-card-content space-y-4">
             {upcomingGames.map((game) => (
-              <div key={game.id} className="border rounded-lg p-4 hover:bg-gray-50">
+              <div key={game.id} className="border border-red-100 rounded-lg p-4 hover:bg-red-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium text-gray-900">{game.opponent}</h3>
@@ -194,7 +207,7 @@ export default function Dashboard({ user }) {
                       <span>{game.venue}</span>
                     </div>
                   </div>
-                  <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                  <button className="carp-btn carp-btn-primary">
                     応援参加
                   </button>
                 </div>
@@ -205,21 +218,25 @@ export default function Dashboard({ user }) {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">クイックアクション</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="flex items-center justify-center space-x-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700">
-            <MessageSquare className="h-5 w-5" />
-            <span>新しい投稿</span>
-          </button>
-          <button className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-            <Users className="h-5 w-5" />
-            <span>仲間を探す</span>
-          </button>
-          <button className="flex items-center justify-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
-            <Calendar className="h-5 w-5" />
-            <span>試合予約</span>
-          </button>
+      <div className="carp-card">
+        <div className="carp-card-header">
+          <h2 className="text-lg font-semibold">クイックアクション</h2>
+        </div>
+        <div className="carp-card-content">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button className="carp-btn carp-btn-primary">
+              <Plus className="h-5 w-5" />
+              <span>新しい投稿</span>
+            </button>
+            <button className="carp-btn carp-btn-secondary">
+              <Search className="h-5 w-5" />
+              <span>仲間を探す</span>
+            </button>
+            <button className="carp-btn carp-btn-secondary">
+              <Ticket className="h-5 w-5" />
+              <span>試合予約</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
