@@ -17,7 +17,7 @@ Parameters:
 Globals:
   Function:
     Timeout: 30
-    Runtime: python3.11
+    Runtime: python3.13
     Environment:
       Variables:
         ENVIRONMENT: !Ref Environment
