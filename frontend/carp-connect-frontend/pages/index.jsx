@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import { getCurrentUser } from 'aws-amplify/auth';
-import Head from 'next/head';
-import Layout from '../components/layout/Layout';
-import Dashboard from '../components/Dashboard';
+import Layout from '../components/layout/Layout.jsx';
+import Dashboard from '../components/Dashboard.jsx';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -34,13 +33,6 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        <title>カープコネクト - 広島の若者をつなぐソーシャルプラットフォーム</title>
-        <meta name="description" content="カープを通じて広島の若者が繋がるソーシャルコネクトサービス" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       {user ? (
         <Layout>
           <Dashboard user={user} />
@@ -113,3 +105,4 @@ export default function Home() {
     </>
   );
 }
+

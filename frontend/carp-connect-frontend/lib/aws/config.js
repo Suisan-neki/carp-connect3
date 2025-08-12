@@ -1,12 +1,12 @@
-import { Amplify } from \'aws-amplify\';
+import { Amplify } from 'aws-amplify';
 
 const awsConfig = {
   Auth: {
     Cognito: {
-      region: process.env.NEXT_PUBLIC_AWS_REGION || \'ap-northeast-1\',
-      userPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID || \'ap-northeast-1_XXXXXXXXX\',
-      userPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID || \'xxxxxxxxxxxxxxxxxxxxxxxxxx\',
-      signUpVerificationMethod: \'code\',
+      region: import.meta.env.VITE_AWS_REGION || 'ap-northeast-1',
+      userPoolId: import.meta.env.VITE_USER_POOL_ID || 'ap-northeast-1_XXXXXXXXX',
+      userPoolClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID || 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+      signUpVerificationMethod: 'code',
       loginWith: {
         email: true,
         phone: true,
@@ -16,8 +16,8 @@ const awsConfig = {
   API: {
     REST: {
       CarpConnectAPI: {
-        endpoint: process.env.NEXT_PUBLIC_API_GATEWAY_URL || \'https://api.example.com\',
-        region: process.env.NEXT_PUBLIC_AWS_REGION || \'ap-northeast-1\',
+        endpoint: import.meta.env.VITE_API_GATEWAY_URL || 'https://api.example.com',
+        region: import.meta.env.VITE_AWS_REGION || 'ap-northeast-1',
       },
     },
   },
