@@ -1,11 +1,9 @@
-import { Amplify } from 'aws-amplify';
-
 const awsConfig = {
   Auth: {
     Cognito: {
-      region: import.meta.env.VITE_AWS_REGION || 'ap-northeast-1',
-      userPoolId: import.meta.env.VITE_USER_POOL_ID || 'ap-northeast-1_XXXXXXXXX',
-      userPoolClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID || 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+      region: import.meta.env.VITE_AWS_REGION,
+      userPoolId: import.meta.env.VITE_USER_POOL_ID,
+      userPoolClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID,
       signUpVerificationMethod: 'code',
       loginWith: {
         email: true,
@@ -16,14 +14,11 @@ const awsConfig = {
   API: {
     REST: {
       CarpConnectAPI: {
-        endpoint: import.meta.env.VITE_API_GATEWAY_URL || 'https://api.example.com',
-        region: import.meta.env.VITE_AWS_REGION || 'ap-northeast-1',
+        endpoint: import.meta.env.VITE_API_GATEWAY_URL,
+        region: import.meta.env.VITE_AWS_REGION,
       },
     },
   },
 };
-
-// Amplifyの設定を初期化
-Amplify.configure(awsConfig );
 
 export default awsConfig;
