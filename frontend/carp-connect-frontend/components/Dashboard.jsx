@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { 
   MessageSquare, 
   Users, 
@@ -68,6 +69,22 @@ export default function Dashboard({ user }) {
       venue: 'マツダスタジアム'
     }
   ]);
+
+  const router = useRouter();
+
+  const handleNewPostClick = () => {
+    router.push('/board'); // 投稿フィードへの遷移
+  };
+
+  const handleFindFriendsClick = () => {
+    // ユーザー検索ページへの遷移（仮のパス）
+    // ユーザー名・性別・キーワード検索等の機能は別途実装が必要です
+    router.push('/search-friends'); 
+  };
+
+  const handleGameReservationClick = () => {
+    window.open('https://www.carp.co.jp/ticket/kuuseki.html', '_blank' ); // 公式ホームページへの遷移
+  };
 
   return (
     <div className="space-y-6 carp-fade-in">
@@ -224,15 +241,15 @@ export default function Dashboard({ user }) {
         </div>
         <div className="carp-card-content">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="carp-btn carp-btn-primary">
+            <button className="carp-btn carp-btn-primary" onClick={handleNewPostClick}>
               <Plus className="h-5 w-5" />
               <span>新しい投稿</span>
             </button>
-            <button className="carp-btn carp-btn-secondary">
+            <button className="carp-btn carp-btn-secondary" onClick={handleFindFriendsClick}>
               <Search className="h-5 w-5" />
               <span>仲間を探す</span>
             </button>
-            <button className="carp-btn carp-btn-secondary">
+            <button className="carp-btn carp-btn-secondary" onClick={handleGameReservationClick}>
               <Ticket className="h-5 w-5" />
               <span>試合予約</span>
             </button>
