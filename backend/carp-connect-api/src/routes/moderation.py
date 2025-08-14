@@ -5,195 +5,170 @@ from datetime import datetime
 
 moderation_bp = Blueprint('moderation', __name__)
 
-# デモ用のモックアップ実装
-# 実際の実装ではAmazon Bedrockを使用してELYZA-japanese-Llama-2で判定
+# 統計データ（メモリ内保存）
+moderation_stats = {
+    'total_analyzed': 0,
+    'blocked_content': 0,
+    'flagged_content': 0,
+    'safe_content': 0,
+    'last_updated': datetime.now().isoformat()
+}
 
-# 不適切なキーワードのリスト（デモ用）
+# 不適切なキーワードのリスト
 INAPPROPRIATE_KEYWORDS = [
-    '死ね', 'バカ', 'アホ', 'クソ', 'ゴミ', 'カス',
-    '殺す', '暴力', '差別', 'ヘイト', '誹謗中傷',
-    '詐欺', '違法', '薬物', 'ギャンブル'
+    '死ね', 'バカ', 'アホ', 'クソ', 'ゴミ', 'カス', 'ブス', 'デブ',
+    '殺す', '消えろ', 'うざい', 'きもい', 'むかつく', 'ざまあ'
 ]
 
-# 政治的・宗教的なキーワード（デモ用）
+# 政治・宗教関連キーワード
 POLITICAL_RELIGIOUS_KEYWORDS = [
-    '政治', '選挙', '政党', '宗教', '信仰', '神',
-    '仏教', 'キリスト教', 'イスラム教', '創価学会'
+    '政治', '選挙', '政党', '宗教', '神', '仏', '創価', '共産党'
 ]
 
-def analyze_content_with_mock_llm(content):
+# スパム関連キーワード
+SPAM_KEYWORDS = [
+    '稼げる', '副業', '投資', '儲かる', 'お金', '無料', 'プレゼント',
+    'クリック', 'URL', 'http', 'www', '.com'
+]
+
+def analyze_content_with_llm(content, content_type, user_id, content_id):
     """
-    モックアップLLM分析
-    実際の実装ではAmazon Bedrockを使用
+    Amazon Bedrockを模擬したコンテンツ分析
+    実際の実装では、ここでBedrockのAPIを呼び出します
     """
     
-    # 基本的な不適切コンテンツ検出
-    inappropriate_score = 0
-    detected_issues = []
+    # 分析結果の初期化
+    analysis = {
+        'content': content,
+        'content_type': content_type,
+        'user_id': user_id,
+        'content_id': content_id,
+        'timestamp': datetime.now().isoformat(),
+        'risk_score': 0,
+        'detected_issues': [],
+        'safe_to_post': True,
+        'reason': '',
+        'confidence': 0.95
+    }
     
-    # 不適切なキーワードチェック
+    # 不適切なキーワードの検出
+    inappropriate_found = []
     for keyword in INAPPROPRIATE_KEYWORDS:
         if keyword in content:
-            inappropriate_score += 0.3
-            detected_issues.append(f"不適切な表現: '{keyword}'")
+            inappropriate_found.append(f"不適切な言葉: '{keyword}'")
+            analysis['risk_score'] += 30
     
-    # 政治的・宗教的コンテンツチェック
+    # 政治・宗教関連の検出
+    political_religious_found = []
     for keyword in POLITICAL_RELIGIOUS_KEYWORDS:
         if keyword in content:
-            inappropriate_score += 0.2
-            detected_issues.append(f"政治的・宗教的内容: '{keyword}'")
+            political_religious_found.append(f"政治・宗教関連: '{keyword}'")
+            analysis['risk_score'] += 20
     
-    # 長すぎる投稿（スパム判定）
-    if len(content) > 1000:
-        inappropriate_score += 0.1
-        detected_issues.append("投稿が長すぎます（スパムの可能性）")
+    # スパム関連の検出
+    spam_found = []
+    for keyword in SPAM_KEYWORDS:
+        if keyword in content:
+            spam_found.append(f"スパム関連: '{keyword}'")
+            analysis['risk_score'] += 25
     
-    # 同じ文字の繰り返し（スパム判定）
-    if re.search(r'(.)\1{10,}', content):
-        inappropriate_score += 0.4
-        detected_issues.append("同じ文字の異常な繰り返し")
+    # 検出された問題をまとめる
+    analysis['detected_issues'] = inappropriate_found + political_religious_found + spam_found
     
-    # URLの大量投稿（スパム判定）
-    url_count = len(re.findall(r'https?://\S+', content))
-    if url_count > 3:
-        inappropriate_score += 0.3
-        detected_issues.append(f"URL大量投稿 ({url_count}個)")
-    
-    # スコアを0-1の範囲に正規化
-    inappropriate_score = min(inappropriate_score, 1.0)
-    
-    # 判定結果
-    if inappropriate_score >= 0.7:
-        action = "block"
-        reason = "高リスク: 投稿をブロックします"
-    elif inappropriate_score >= 0.4:
-        action = "review"
-        reason = "中リスク: 人間による確認が必要です"
-    elif inappropriate_score >= 0.2:
-        action = "warn"
-        reason = "低リスク: 警告を表示します"
+    # リスクスコアに基づく判定
+    if analysis['risk_score'] >= 50:
+        analysis['safe_to_post'] = False
+        analysis['reason'] = '不適切な内容が検出されました。投稿をブロックします。'
+        moderation_stats['blocked_content'] += 1
+    elif analysis['risk_score'] >= 20:
+        analysis['safe_to_post'] = True
+        analysis['reason'] = '注意が必要な内容が検出されました。投稿は許可されますが、ご注意ください。'
+        moderation_stats['flagged_content'] += 1
     else:
-        action = "allow"
-        reason = "問題なし: 投稿を許可します"
+        analysis['safe_to_post'] = True
+        analysis['reason'] = '問題のない内容です。'
+        moderation_stats['safe_content'] += 1
     
-    return {
-        "score": inappropriate_score,
-        "action": action,
-        "reason": reason,
-        "detected_issues": detected_issues,
-        "analysis_time": time.time()
-    }
+    # 統計を更新
+    moderation_stats['total_analyzed'] += 1
+    moderation_stats['last_updated'] = datetime.now().isoformat()
+    
+    return analysis
 
-@moderation_bp.route('/moderation/analyze', methods=['POST'])
+@moderation_bp.route('/analyze', methods=['POST'])
 def analyze_content():
-    """コンテンツの適切性を分析"""
+    """コンテンツ分析エンドポイント"""
     try:
         data = request.get_json()
         
-        if not data or 'content' not in data:
-            return jsonify({
-                'success': False,
-                'error': 'Content is required'
-            }), 400
+        # 必須パラメータの確認
+        required_fields = ['content', 'type', 'user_id', 'content_id']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'success': False,
+                    'error': f'必須フィールド "{field}" が不足しています'
+                }), 400
         
-        content = data['content']
-        content_type = data.get('type', 'post')  # post, reply, dm
-        
-        # モックアップLLM分析を実行
-        analysis_result = analyze_content_with_mock_llm(content)
-        
-        # 分析結果をログに記録（実際の実装ではDynamoDBに保存）
-        moderation_log = {
-            'content_id': data.get('content_id', 'unknown'),
-            'content_type': content_type,
-            'content_preview': content[:100] + '...' if len(content) > 100 else content,
-            'analysis_result': analysis_result,
-            'timestamp': datetime.utcnow().isoformat() + 'Z',
-            'user_id': data.get('user_id', 'anonymous')
-        }
+        # コンテンツ分析を実行
+        moderation_result = analyze_content_with_llm(
+            content=data['content'],
+            content_type=data['type'],
+            user_id=data['user_id'],
+            content_id=data['content_id']
+        )
         
         return jsonify({
             'success': True,
-            'moderation': {
-                'score': analysis_result['score'],
-                'action': analysis_result['action'],
-                'reason': analysis_result['reason'],
-                'detected_issues': analysis_result['detected_issues'],
-                'safe_to_post': analysis_result['action'] in ['allow', 'warn']
-            },
-            'log_id': f"mod_{int(analysis_result['analysis_time'])}"
-        }), 200
+            'moderation': moderation_result
+        })
         
     except Exception as e:
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': f'分析中にエラーが発生しました: {str(e)}'
         }), 500
 
-@moderation_bp.route('/moderation/stats', methods=['GET'])
+@moderation_bp.route('/stats', methods=['GET'])
 def get_moderation_stats():
-    """モデレーション統計情報を取得（デモ用）"""
-    try:
-        # デモ用の統計データ
-        stats = {
-            'total_analyzed': 1247,
-            'blocked_content': 23,
-            'flagged_for_review': 45,
-            'warnings_issued': 89,
-            'allowed_content': 1090,
-            'analysis_accuracy': 0.94,
-            'average_response_time': 0.12,  # seconds
-            'last_updated': datetime.utcnow().isoformat() + 'Z'
-        }
-        
-        return jsonify({
-            'success': True,
-            'stats': stats
-        }), 200
-        
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+    """モデレーション統計情報を取得"""
+    return jsonify({
+        'success': True,
+        'stats': moderation_stats
+    })
 
-@moderation_bp.route('/moderation/test-cases', methods=['GET'])
+@moderation_bp.route('/test-cases', methods=['GET'])
 def get_test_cases():
-    """デモ用のテストケースを提供"""
+    """テストケースを取得"""
     test_cases = [
         {
-            'id': 1,
-            'content': '今日の試合、本当に最高でした！カープの勝利に感動しました！',
-            'expected_action': 'allow',
-            'description': '正常なコンテンツ'
+            'name': '正常なコンテンツ',
+            'content': '今日の試合、とても良かったです！カープの勝利に感動しました。',
+            'expected': 'safe'
         },
         {
-            'id': 2,
-            'content': 'あの審判はバカだ！死ねばいいのに！',
-            'expected_action': 'block',
-            'description': '不適切な表現を含む'
+            'name': '不適切な言葉',
+            'content': 'あの選手はバカだ。死ねばいいのに。',
+            'expected': 'blocked'
         },
         {
-            'id': 3,
-            'content': '政治の話になりますが、今度の選挙では...',
-            'expected_action': 'review',
-            'description': '政治的内容を含む'
+            'name': '政治的内容',
+            'content': '今度の選挙では○○政党に投票しましょう。',
+            'expected': 'flagged'
         },
         {
-            'id': 4,
-            'content': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            'expected_action': 'block',
-            'description': '同じ文字の異常な繰り返し'
+            'name': 'スパム的内容',
+            'content': '簡単に稼げる副業があります！詳しくはこのURLをクリック！',
+            'expected': 'flagged'
         },
         {
-            'id': 5,
-            'content': 'カープの応援、ちょっと熱くなりすぎたかも。反省してます。',
-            'expected_action': 'warn',
-            'description': '軽微な問題を含む可能性'
+            'name': '軽微な問題',
+            'content': 'あの審判の判定はちょっとむかつくなあ。',
+            'expected': 'flagged'
         }
     ]
     
     return jsonify({
         'success': True,
         'test_cases': test_cases
-    }), 200
+    })
