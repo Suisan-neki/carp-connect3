@@ -1,0 +1,8 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/board": "pages/board.js",
+  "/messages": "pages/messages.js",
+  "/search-friends": "pages/search-friends.js"
+}
