@@ -18,7 +18,7 @@ export default function Board() {
   const [topics, setTopics] = useState([
     {
       id: '1',
-      author: '赤ヘル太郎',
+      author: 'マサト',
       title: '今日の試合について語ろう！',
       content: '9回裏の逆転劇、本当に感動しました！みんなはどう思った？',
       created_at: '2025/08/12(月) 20:15:23.45',
@@ -28,7 +28,7 @@ export default function Board() {
     },
     {
       id: '4',
-      author: 'スタジアム常連',
+      author: 'サヤカ',
       title: 'マツダスタジアムのおすすめグルメ',
       content: 'スタジアムで食べられる美味しいものを教えて！特にビールのおつまみが知りたいです🍺',
       created_at: '2025/08/12(月) 18:30:15.23',
@@ -38,7 +38,7 @@ export default function Board() {
     },
     {
       id: '6',
-      author: '応援団長',
+      author: 'ケンタ',
       title: '来週の巨人戦、一緒に応援しませんか？',
       content: '来週の巨人戦のチケットを取りました！一緒に応援してくれる仲間を募集中です。',
       created_at: '2025/08/12(月) 16:45:08.91',
@@ -160,6 +160,9 @@ export default function Board() {
                       required
                     />
                   </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    投稿された内容は、自動モデレーションシステムによって不適切な内容がないか確認されます。
+                  </p>
                   <div className="flex space-x-3">
                     <button type="submit" className="carp-btn carp-btn-primary">
                       トピック作成

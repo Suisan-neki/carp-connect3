@@ -15,8 +15,8 @@ export default function Messages() {
   const [conversations, setConversations] = useState([
     {
       id: 1,
-      name: '赤ヘル太郎',
-      lastMessage: '今度の試合、一緒に見に行きませんか？',
+      name: 'ユウキ',
+      lastMessage: 'もしよかったら、一緒に観に行かない？チケットまだあるっぽいんだけど！',
       time: '2分前',
       unread: 2,
       online: true,
@@ -25,7 +25,7 @@ export default function Messages() {
     {
       id: 2,
       name: 'カープ女子会',
-      lastMessage: 'みんな: スタジアムグルメの写真をシェアしよう！',
+      lastMessage: 'みんな: マツスタ飯、何がおすすめ？写真見せてー！',
       time: '15分前',
       unread: 5,
       online: false,
@@ -34,8 +34,8 @@ export default function Messages() {
     },
     {
       id: 3,
-      name: '広島っ子',
-      lastMessage: 'ありがとうございました！',
+      name: 'ハルカ',
+      lastMessage: 'まじ助かった！サンキュー！',
       time: '1時間前',
       unread: 0,
       online: false,
@@ -44,7 +44,7 @@ export default function Messages() {
     {
       id: 4,
       name: '応援団メンバー',
-      lastMessage: '次の応援歌の練習をしましょう',
+      lastMessage: '次の応援歌、練習しとこーぜ！',
       time: '3時間前',
       unread: 1,
       online: true,
@@ -57,29 +57,29 @@ export default function Messages() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      sender: '赤ヘル太郎',
-      content: 'こんにちは！今日の試合見ましたか？',
+      sender: 'ユウキ',
+      content: 'おはよー！昨日のカープ戦見た？マジやばかったんだけど！',
       time: '14:30',
       isOwn: false
     },
     {
       id: 2,
       sender: 'あなた',
-      content: 'はい！最後の逆転劇は本当に感動しました！',
+      content: '見た見た！9回裏の逆転とか鳥肌もんだったわ！まじ感動した！',
       time: '14:32',
       isOwn: true
     },
     {
       id: 3,
-      sender: '赤ヘル太郎',
-      content: '本当にそうですね！来週の試合も楽しみです',
+      sender: 'ユウキ',
+      content: 'だよねー！あの雰囲気、現地で味わいたかったわー。来週の試合、どうする？',
       time: '14:35',
       isOwn: false
     },
     {
       id: 4,
-      sender: '赤ヘル太郎',
-      content: '今度の試合、一緒に見に行きませんか？',
+      sender: 'ユウキ',
+      content: 'もしよかったら、一緒に観に行かない？チケットまだあるっぽいんだけど！',
       time: '14:38',
       isOwn: false
     }
