@@ -42,7 +42,7 @@ export default function Layout({ children }) {
             <div className="flex h-16 items-center justify-between px-4 carp-gradient">
               <div className="flex items-center">
                 <Heart className="h-8 w-8 text-white" />
-                <span className="ml-2 text-xl font-bold text-white">カープコネクト</span>
+                <span className="ml-2 text-3xl font-bold text-white" style={{ fontFamily: 'TamanegeKaisyoGeki, sans-serif' }}>カープコネクト</span>
               </div>
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -80,7 +80,7 @@ export default function Layout({ children }) {
           <div className="flex flex-col flex-grow bg-white shadow-lg border-r border-red-100">
             <div className="flex h-16 items-center px-4 carp-gradient">
               <Heart className="h-8 w-8 text-white" />
-              <span className="ml-2 text-xl font-bold text-white">カープコネクト</span>
+              <span className="ml-2 text-3xl font-bold text-white" style={{ fontFamily: 'TamanegeKaisyoGeki, sans-serif' }}>カープコネクト</span>
             </div>
             <nav className="flex-1 px-4 py-4">
               {navigation.map((item) => (

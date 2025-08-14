@@ -291,3 +291,11 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--carp-red);
 }
+
+@font-face {
+  font-family: 'TamanegeKaisyoGeki';
+  src: url('/fonts/玉ねぎ楷書激無料版v7改.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
