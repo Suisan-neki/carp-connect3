@@ -10,7 +10,10 @@ import {
   TrendingUp,
   Clock,
   Users,
-  ArrowLeft
+  ArrowLeft,
+  AlertTriangle,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 
 export default function TopicDetail() {
@@ -19,6 +22,8 @@ export default function TopicDetail() {
   const [topic, setTopic] = useState(null);
   const [replies, setReplies] = useState([]);
   const [newReplyContent, setNewReplyContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [moderationResult, setModerationResult] = useState(null);
 
   // 仮のデータ。実際にはAPIから取得します。
   const allTopics = [
@@ -56,68 +61,127 @@ export default function TopicDetail() {
 
   const allReplies = [
     {
-      id: '2',
+      id: 1,
       topic_id: '1',
       author: 'カープ女子',
-      content: '本当に最高でした！鳥肌が立ちました',
-      created_at: '2025/08/12(月) 20:18:45.12'
+      content: '本当に感動的でした！最後まで諦めない姿勢が素晴らしい！',
+      created_at: '2025/08/12(月) 20:30:15.23',
+      likes: 12
     },
     {
-      id: '3',
+      id: 2,
       topic_id: '1',
       author: '広島っ子',
-      content: '今年のカープは違うね！優勝いけるかも',
-      created_at: '2025/08/12(月) 20:22:11.78'
+      content: '9回裏の代打策が見事にハマりましたね。監督の采配も光りました。',
+      created_at: '2025/08/12(月) 20:45:32.11',
+      likes: 8
     },
     {
-      id: '5',
+      id: 3,
       topic_id: '4',
       author: 'グルメ通',
-      content: 'カープうどんは絶対食べるべき！',
-      created_at: '2025/08/12(月) 18:45:32.67'
+      content: 'カープうどんは絶対食べるべき！あと、もみじ饅頭ソフトクリームもおすすめです。',
+      created_at: '2025/08/12(月) 19:15:44.67',
+      likes: 15
     }
   ];
 
   useEffect(() => {
     if (id) {
+      // トピックを取得
       const foundTopic = allTopics.find(t => t.id === id);
       setTopic(foundTopic);
-      const foundReplies = allReplies.filter(r => r.topic_id === id);
-      setReplies(foundReplies);
+
+      // 返信を取得
+      const topicReplies = allReplies.filter(r => r.topic_id === id);
+      setReplies(topicReplies);
     }
   }, [id]);
 
-  const handleReplySubmit = (e) => {
+  const analyzeContent = async (content) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/moderation/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: content,
+          type: 'reply',
+          user_id: 'current_user',
+          content_id: `reply_${Date.now()}`
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        return data.moderation;
+      } else {
+        console.error('モデレーション分析エラー:', data.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('モデレーション分析リクエストエラー:', error);
+      return null;
+    }
+  };
+
+  const handleSubmitReply = async (e) => {
     e.preventDefault();
-    if (newReplyContent.trim() && topic) {
+    if (!newReplyContent.trim()) return;
+
+    setIsSubmitting(true);
+    setModerationResult(null);
+
+    try {
+      // コンテンツモデレーション分析
+      const moderation = await analyzeContent(newReplyContent);
+      setModerationResult(moderation);
+
+      if (moderation && !moderation.safe_to_post) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 返信を投稿（実際にはAPIに送信）
       const newReply = {
-        id: String(Date.now()),
-        topic_id: topic.id,
-        author: 'あなた',
+        id: replies.length + 1,
+        topic_id: id,
+        author: '現在のユーザー',
         content: newReplyContent,
-        created_at: new Date().toLocaleString('ja-JP', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          weekday: 'short',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        }).replace(/\//g, '/').replace(',', '')
+        created_at: new Date().toLocaleString('ja-JP'),
+        likes: 0
       };
+
       setReplies([...replies, newReply]);
       setNewReplyContent('');
-      // ここでAPIに返信を送信するロジックを追加
+      setModerationResult(null);
+    } catch (error) {
+      console.error('返信投稿エラー:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLike = (replyId) => {
+    setReplies(replies.map(reply => 
+      reply.id === replyId 
+        ? { ...reply, likes: reply.likes + 1 }
+        : reply
+    ));
+  };
+
+  const handleTopicLike = () => {
+    if (topic) {
+      setTopic({ ...topic, likes: topic.likes + 1 });
     }
   };
 
   if (!topic) {
     return (
       <Layout>
-        <div className="carp-card">
-          <div className="carp-card-content">
-            <p>トピックが見つかりません。</p>
-          </div>
+        <div className="text-center py-8">
+          <p className="text-gray-600">トピックが見つかりません。</p>
         </div>
       </Layout>
     );
@@ -130,93 +194,162 @@ export default function TopicDetail() {
       </Head>
 
       <Layout>
-        <div className="space-y-6">
-          {/* Back Button */}
-          <div className="flex justify-start">
-            <button
-              onClick={() => router.push('/board')}
-              className="carp-btn carp-btn-ghost"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>掲示板に戻る</span>
-            </button>
-          </div>
+        <div className="space-y-6 carp-fade-in">
+          {/* 戻るボタン */}
+          <button
+            onClick={() => router.back()}
+            className="carp-btn carp-btn-ghost"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>戻る</span>
+          </button>
 
-          {/* Topic Detail */}
+          {/* トピック詳細 */}
           <div className="carp-card">
             <div className="carp-card-header">
-              <h1 className="text-2xl font-bold">{topic.title}</h1>
-              <div className="text-sm text-gray-500 flex items-center space-x-2 mt-1">
-                <Users className="h-4 w-4" />
-                <span>{topic.author}</span>
-                <Clock className="h-4 w-4" />
-                <span>{topic.created_at}</span>
-                <span className="inline-block bg-red-100 text-red-600 text-xs px-2 py-1 rounded ml-2">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h1 className="text-xl font-bold mb-2">{topic.title}</h1>
+                  <div className="flex items-center space-x-4 text-sm text-red-100">
+                    <div className="flex items-center space-x-1">
+                      <Users className="h-4 w-4" />
+                      <span>{topic.author}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{topic.created_at}</span>
+                    </div>
+                  </div>
+                </div>
+                <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full">
                   {topic.category}
                 </span>
               </div>
             </div>
             <div className="carp-card-content">
-              <p className="text-gray-800">{topic.content}</p>
-              <div className="flex items-center space-x-4 mt-4 text-sm text-gray-500">
-                <div className="flex items-center space-x-1">
-                  <Heart className="h-4 w-4" />
-                  <span>{topic.likes} いいね</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <MessageSquare className="h-4 w-4" />
-                  <span>{replies.length} 返信</span>
+              <p className="text-gray-800 mb-4 leading-relaxed">{topic.content}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={handleTopicLike}
+                    className="flex items-center space-x-1 text-gray-600 hover:text-red-600 transition-colors"
+                  >
+                    <Heart className="h-4 w-4" />
+                    <span>{topic.likes}</span>
+                  </button>
+                  <div className="flex items-center space-x-1 text-gray-600">
+                    <MessageSquare className="h-4 w-4" />
+                    <span>{replies.length}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Replies Section */}
+          {/* 返信一覧 */}
           <div className="carp-card">
             <div className="carp-card-header">
               <h2 className="text-lg font-semibold">返信 ({replies.length})</h2>
             </div>
-            <div className="carp-card-content space-y-4">
+            <div className="carp-card-content">
               {replies.length === 0 ? (
-                <p className="text-gray-600">まだ返信はありません。</p>
+                <p className="text-gray-600 text-center py-8">まだ返信がありません。最初の返信を投稿してみましょう！</p>
               ) : (
-                replies.map((reply) => (
-                  <div key={reply.id} className="border-b border-gray-100 pb-4 last:border-b-0">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                        <Reply className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium text-gray-900">{reply.author}</span>
-                          <span className="text-sm text-gray-500">{reply.created_at}</span>
+                <div className="space-y-4">
+                  {replies.map((reply) => (
+                    <div key={reply.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <Users className="h-4 w-4" />
+                          <span className="font-medium">{reply.author}</span>
+                          <Clock className="h-4 w-4" />
+                          <span>{reply.created_at}</span>
                         </div>
-                        <p className="text-gray-700 mt-1">{reply.content}</p>
+                      </div>
+                      <p className="text-gray-800 mb-2 leading-relaxed">{reply.content}</p>
+                      <div className="flex items-center space-x-4">
+                        <button
+                          onClick={() => handleLike(reply.id)}
+                          className="flex items-center space-x-1 text-gray-600 hover:text-red-600 transition-colors"
+                        >
+                          <Heart className="h-4 w-4" />
+                          <span>{reply.likes}</span>
+                        </button>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </div>
 
-          {/* Reply Form */}
+          {/* 返信投稿フォーム */}
           <div className="carp-card">
             <div className="carp-card-header">
-              <h2 className="text-lg font-semibold">返信する</h2>
+              <h2 className="text-lg font-semibold">返信を投稿</h2>
             </div>
             <div className="carp-card-content">
-              <form onSubmit={handleReplySubmit} className="space-y-4">
-                <textarea
-                  value={newReplyContent}
-                  onChange={(e) => setNewReplyContent(e.target.value)}
-                  rows={4}
-                  className="carp-input carp-textarea"
-                  placeholder="返信内容を入力してください"
-                  required
-                />
-                <button type="submit" className="carp-btn carp-btn-primary">
-                  返信を投稿
+              {/* モデレーション結果表示 */}
+              {moderationResult && (
+                <div className={`mb-4 p-4 rounded-lg border ${
+                  moderationResult.safe_to_post 
+                    ? 'bg-yellow-50 border-yellow-200' 
+                    : 'bg-red-50 border-red-200'
+                }`}>
+                  <div className="flex items-center space-x-2">
+                    {moderationResult.safe_to_post ? (
+                      <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-red-500" />
+                    )}
+                    <span className={`font-medium ${
+                      moderationResult.safe_to_post ? 'text-yellow-800' : 'text-red-800'
+                    }`}>
+                      {moderationResult.reason}
+                    </span>
+                  </div>
+                  {moderationResult.detected_issues && moderationResult.detected_issues.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {moderationResult.detected_issues.map((issue, index) => (
+                        <li key={index} className={`text-sm ${
+                          moderationResult.safe_to_post ? 'text-yellow-700' : 'text-red-700'
+                        }`}>
+                          • {issue}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitReply} className="space-y-4">
+                <div>
+                  <label className="carp-label">返信内容</label>
+                  <textarea
+                    value={newReplyContent}
+                    onChange={(e) => setNewReplyContent(e.target.value)}
+                    rows={4}
+                    className="carp-input carp-textarea"
+                    placeholder="返信を入力してください..."
+                    required
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="carp-btn carp-btn-primary"
+                  disabled={isSubmitting || !newReplyContent.trim()}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>投稿中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Reply className="h-4 w-4" />
+                      <span>返信を投稿</span>
+                    </>
+                  )}
                 </button>
               </form>
             </div>
