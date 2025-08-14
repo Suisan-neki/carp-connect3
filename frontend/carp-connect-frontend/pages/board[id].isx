@@ -1,0 +1,228 @@
+import { useState, useEffect } from 'react';
+import Head from 'next/head';
+import Layout from '../../components/layout/Layout';
+import { useRouter } from 'next/router';
+import {
+  MessageSquare,
+  Heart,
+  Reply,
+  Plus,
+  TrendingUp,
+  Clock,
+  Users,
+  ArrowLeft
+} from 'lucide-react';
+
+export default function TopicDetail() {
+  const router = useRouter();
+  const { id } = router.query;
+  const [topic, setTopic] = useState(null);
+  const [replies, setReplies] = useState([]);
+  const [newReplyContent, setNewReplyContent] = useState('');
+
+  // 仮のデータ。実際にはAPIから取得します。
+  const allTopics = [
+    {
+      id: '1',
+      author: '赤ヘル太郎',
+      title: '今日の試合について語ろう！',
+      content: '9回裏の逆転劇、本当に感動しました！みんなはどう思った？',
+      created_at: '2025/08/12(月) 20:15:23.45',
+      likes: 24,
+      reply_count: 2,
+      category: '試合感想'
+    },
+    {
+      id: '4',
+      author: 'スタジアム常連',
+      title: 'マツダスタジアムのおすすめグルメ',
+      content: 'スタジアムで食べられる美味しいものを教えて！特にビールのおつまみが知りたいです🍺',
+      created_at: '2025/08/12(月) 18:30:15.23',
+      likes: 18,
+      reply_count: 1,
+      category: 'グルメ'
+    },
+    {
+      id: '6',
+      author: '応援団長',
+      title: '来週の巨人戦、一緒に応援しませんか？',
+      content: '来週の巨人戦のチケットを取りました！一緒に応援してくれる仲間を募集中です。',
+      created_at: '2025/08/12(月) 16:45:08.91',
+      likes: 31,
+      reply_count: 0,
+      category: '応援募集'
+    }
+  ];
+
+  const allReplies = [
+    {
+      id: '2',
+      topic_id: '1',
+      author: 'カープ女子',
+      content: '本当に最高でした！鳥肌が立ちました',
+      created_at: '2025/08/12(月) 20:18:45.12'
+    },
+    {
+      id: '3',
+      topic_id: '1',
+      author: '広島っ子',
+      content: '今年のカープは違うね！優勝いけるかも',
+      created_at: '2025/08/12(月) 20:22:11.78'
+    },
+    {
+      id: '5',
+      topic_id: '4',
+      author: 'グルメ通',
+      content: 'カープうどんは絶対食べるべき！',
+      created_at: '2025/08/12(月) 18:45:32.67'
+    }
+  ];
+
+  useEffect(() => {
+    if (id) {
+      const foundTopic = allTopics.find(t => t.id === id);
+      setTopic(foundTopic);
+      const foundReplies = allReplies.filter(r => r.topic_id === id);
+      setReplies(foundReplies);
+    }
+  }, [id]);
+
+  const handleReplySubmit = (e) => {
+    e.preventDefault();
+    if (newReplyContent.trim() && topic) {
+      const newReply = {
+        id: String(Date.now()),
+        topic_id: topic.id,
+        author: 'あなた',
+        content: newReplyContent,
+        created_at: new Date().toLocaleString('ja-JP', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          weekday: 'short',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(/\//g, '/').replace(',', '')
+      };
+      setReplies([...replies, newReply]);
+      setNewReplyContent('');
+      // ここでAPIに返信を送信するロジックを追加
+    }
+  };
+
+  if (!topic) {
+    return (
+      <Layout>
+        <div className="carp-card">
+          <div className="carp-card-content">
+            <p>トピックが見つかりません。</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <>
+      <Head>
+        <title>{topic.title} - カープコネクト</title>
+      </Head>
+
+      <Layout>
+        <div className="space-y-6">
+          {/* Back Button */}
+          <div className="flex justify-start">
+            <button
+              onClick={() => router.push('/board')}
+              className="carp-btn carp-btn-ghost"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>掲示板に戻る</span>
+            </button>
+          </div>
+
+          {/* Topic Detail */}
+          <div className="carp-card">
+            <div className="carp-card-header">
+              <h1 className="text-2xl font-bold">{topic.title}</h1>
+              <div className="text-sm text-gray-500 flex items-center space-x-2 mt-1">
+                <Users className="h-4 w-4" />
+                <span>{topic.author}</span>
+                <Clock className="h-4 w-4" />
+                <span>{topic.created_at}</span>
+                <span className="inline-block bg-red-100 text-red-600 text-xs px-2 py-1 rounded ml-2">
+                  {topic.category}
+                </span>
+              </div>
+            </div>
+            <div className="carp-card-content">
+              <p className="text-gray-800">{topic.content}</p>
+              <div className="flex items-center space-x-4 mt-4 text-sm text-gray-500">
+                <div className="flex items-center space-x-1">
+                  <Heart className="h-4 w-4" />
+                  <span>{topic.likes} いいね</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>{replies.length} 返信</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Replies Section */}
+          <div className="carp-card">
+            <div className="carp-card-header">
+              <h2 className="text-lg font-semibold">返信 ({replies.length})</h2>
+            </div>
+            <div className="carp-card-content space-y-4">
+              {replies.length === 0 ? (
+                <p className="text-gray-600">まだ返信はありません。</p>
+              ) : (
+                replies.map((reply) => (
+                  <div key={reply.id} className="border-b border-gray-100 pb-4 last:border-b-0">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                        <Reply className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-gray-900">{reply.author}</span>
+                          <span className="text-sm text-gray-500">{reply.created_at}</span>
+                        </div>
+                        <p className="text-gray-700 mt-1">{reply.content}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Reply Form */}
+          <div className="carp-card">
+            <div className="carp-card-header">
+              <h2 className="text-lg font-semibold">返信する</h2>
+            </div>
+            <div className="carp-card-content">
+              <form onSubmit={handleReplySubmit} className="space-y-4">
+                <textarea
+                  value={newReplyContent}
+                  onChange={(e) => setNewReplyContent(e.target.value)}
+                  rows={4}
+                  className="carp-input carp-textarea"
+                  placeholder="返信内容を入力してください"
+                  required
+                />
+                <button type="submit" className="carp-btn carp-btn-primary">
+                  返信を投稿
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    </>
+  );
+}
