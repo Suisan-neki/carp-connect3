@@ -1,6 +1,6 @@
 import os
 import sys
-# DON\'T CHANGE THIS !!!
+# DON'T CHANGE THIS !!!
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from flask import Flask, send_from_directory
@@ -10,20 +10,20 @@ from src.routes.user import user_bp
 from src.routes.board import board_bp
 from src.routes.messages import messages_bp
 from src.routes.profile import profile_bp
-from src.routes.moderation import moderation_bp # 追加
+from src.routes.moderation import moderation_bp  # 追加
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'carp-connect-secret-key-2025'
 
 # CORS設定 - フロントエンドからのアクセスを許可
-CORS(app, origins=['http://localhost:3000', 'https://*.amplifyapp.com'] )
+CORS(app, origins=['http://localhost:3000', 'http://localhost:3001', 'https://*.amplifyapp.com'] )
 
 # APIルートの登録
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(board_bp, url_prefix='/api')
 app.register_blueprint(messages_bp, url_prefix='/api')
 app.register_blueprint(profile_bp, url_prefix='/api')
-app.register_blueprint(moderation_bp, url_prefix='/api') # 追加
+app.register_blueprint(moderation_bp, url_prefix='/api/moderation')  # 追加
 
 # データベース設定
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
