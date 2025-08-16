@@ -292,3 +292,46 @@ body {
   background: var(--carp-red);
 }
 
+/* Amplify UI カスタムスタイル */
+.amplify-container {
+  --amplify-colors-brand-primary-80: var(--carp-red-dark);
+  --amplify-colors-brand-primary-90: var(--carp-red);
+  --amplify-colors-brand-primary-100: var(--carp-red);
+  --amplify-colors-brand-secondary-80: var(--carp-red-dark);
+  --amplify-colors-brand-secondary-90: var(--carp-red);
+  --amplify-colors-brand-secondary-100: var(--carp-red);
+  --amplify-colors-background-primary: var(--carp-white);
+  --amplify-colors-background-secondary: var(--carp-gray-light);
+  --amplify-colors-font-primary: var(--carp-black);
+  --amplify-colors-font-secondary: var(--carp-black);
+  --amplify-colors-font-tertiary: var(--carp-gray);
+  --amplify-colors-border-primary: var(--carp-gray);
+  --amplify-colors-border-secondary: var(--carp-gray-light);
+  --amplify-colors-overlay-backdrop: rgba(0, 0, 0, 0.5);
+}
+
+.amplify-button--primary {
+  background-color: var(--carp-red);
+  border-color: var(--carp-red);
+}
+
+.amplify-button--primary:hover {
+  background-color: var(--carp-red-dark);
+  border-color: var(--carp-red-dark);
+}
+
+.amplify-tabs__item--active {
+  border-bottom-color: var(--carp-red);
+  color: var(--carp-red);
+}
+
+.amplify-field-group__control:focus-within {
+  border-color: var(--carp-red);
+  box-shadow: 0 0 0 1px var(--carp-red);
+}
+
+.amplify-link {
+  color: var(--carp-red);
+}
+
+

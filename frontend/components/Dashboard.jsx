@@ -192,7 +192,7 @@ export default function Dashboard({ user }) {
                 </div>
               </div>
             ))}
-            <button className="carp-btn carp-btn-ghost w-full">
+            <button className="carp-btn carp-btn-ghost w-full" onClick={handleNewPostClick}>
               もっと見る
             </button>
           </div>
