@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 import { 
   MessageSquare, 
   Users, 
@@ -14,7 +15,8 @@ import {
   Ticket
 } from 'lucide-react';
 
-export default function Dashboard({ user }) {
+export default function Dashboard() {
+  const { user } = useAuthenticator(context => [context.user]);
   const [stats, setStats] = useState({
     totalPosts: 42,
     totalFriends: 18,

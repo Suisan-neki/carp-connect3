@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signOut } from 'aws-amplify/auth';
+import { Auth } from 'aws-amplify';
 import { 
   Home, 
   MessageSquare, 
@@ -10,30 +10,33 @@ import {
   X,
   Heart
 } from 'lucide-react';
-import { Authenticator } from '@aws-amplify/ui-react'; // これを追加
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      window.location.reload();
+      // ブラウザのストレージを強制的にクリアする
+      localStorage.clear();
+      // Amplifyの公式サインアウトを実行
+      await Auth.signOut({ global: true });
     } catch (error) {
-      console.error('Error signing out:', error);
+      // signOutはセッションがない場合にエラーを出すことがあるため、コンソールに出力するのみ
+      console.error('Error during sign out process:', error);
+    } finally {
+      // どのような場合でも、最終的にログインページへハードリフレッシュする
+      window.location.href = '/';
     }
   };
 
   const navigation = [
-    { name: 'ホーム', href: '/', icon: Home },
+    { name: 'ホーム', href: '/home', icon: Home },
     { name: '掲示板', href: '/board', icon: MessageSquare },
     { name: 'DM', href: '/messages', icon: Users },
     { name: 'プロフィール', href: '/profile', icon: User },
   ];
 
   return (
-    // Authenticator.Provider で全体をラップ
-    <Authenticator.Provider>
       <div className="min-h-screen carp-bg-gradient">
         {/* Mobile sidebar */}
         <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
@@ -136,6 +139,5 @@ export default function Layout({ children }) {
           </main>
         </div>
       </div>
-    </Authenticator.Provider>
   );
 }

@@ -15,24 +15,17 @@ I18n.setLanguage('ja');
 export default function App({ Component, pageProps }) {
   const router = useRouter();
 
+  // ウェルカムページ('/')は認証なしで表示
+  if (router.pathname === '/') {
+    return <Component {...pageProps} />;
+  }
+
+  // それ以外のすべてのページは認証を必須とする
   return (
     <Authenticator>
-      {({ signOut, user }) => {
-        // If authenticated, and on welcome page, redirect to home
-        if (user && router.pathname === '/welcome') {
-          router.push('/');
-          return null; // Prevent rendering until redirect completes
-        }
-
-        // If not authenticated, and not on welcome page, redirect to welcome
-        if (!user && router.pathname !== '/welcome') {
-          router.push('/welcome');
-          return null; // Prevent rendering until redirect completes
-        }
-
-        // If authenticated, or not authenticated but on welcome page, render the component
-        return <Component {...pageProps} user={user} signOut={signOut} />;
-      }}
+      {({ signOut, user }) => (
+        <Component {...pageProps} user={user} signOut={signOut} />
+      )}
     </Authenticator>
   );
 }
