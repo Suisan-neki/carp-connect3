@@ -124,7 +124,7 @@ export default function Layout({ children }) {
               <div className="flex items-center gap-x-4 lg:gap-x-6">
                 <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-red-200" />
                 <div className="flex items-center text-sm text-gray-600">
-                  <Heart className="h-4 w-4 text-red-600 mr-1" />
+                  <img src="/logo.png" alt="Logo" className="h-6 w-6 mr-1" />
                   <span>カープコネクト</span>
                 </div>
               </div>

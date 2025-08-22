@@ -15,48 +15,60 @@ import {
   Settings
 } from 'lucide-react';
 
+const iconMap = {
+  trophy: Trophy,
+  star: Star,
+  heart: Heart,
+};
+
+// --- 静的デモデータ ---
+const mockProfile = {
+  id: 'user1',
+  name: '水産',
+  birthdate: '2003-07-25',
+  location: '広島県広島市',
+  bio: '愛媛→広島、大学2年生',
+  favorite_player: '矢野雅哉',
+  carp_history: '2016年からのファン',
+  attendance_count: 10,
+  posts_count: 42,
+  friends_count: 18,
+  likes_received: 234,
+  profile_image_url: null,
+};
+
+const mockAchievements = [
+  {
+    id: '1',
+    title: '若鯉応援団',
+    description: '期待の若手を熱烈応援中！',
+    icon: 'star',
+    color: 'blue',
+  },
+  {
+    id: '2',
+    title: '新世代カープファン',
+    description: '2016年から熱烈応援！',
+    icon: 'heart',
+    color: 'red',
+  },
+  {
+    id: '3',
+    title: '瀬戸内カープ魂',
+    description: '愛媛から広島へ！',
+    icon: 'trophy',
+    color: 'yellow',
+  }
+];
+// --- ここまで ---
+
+
 export default function Profile() {
-  const [profile, setProfile] = useState({
-    name: '山田太郎',
-    email: 'yamada@example.com',
-    phone: '+81-90-1234-5678',
-    birthdate: '1995-05-15',
-    location: '広島県広島市',
-    bio: 'カープ愛歴25年！マツダスタジアムに通い続けています。一緒に応援してくれる仲間を探しています⚾',
-    favoritePlayer: '鈴木誠也',
-    carpHistory: '2000年からのファン',
-    attendanceCount: 127,
-    postsCount: 42,
-    friendsCount: 18,
-    likesReceived: 234
-  });
-
+  const [profile, setProfile] = useState(mockProfile);
+  const [editProfile, setEditProfile] = useState(mockProfile);
+  const [achievements, setAchievements] = useState(mockAchievements);
+  const [editAchievements, setEditAchievements] = useState(mockAchievements);
   const [isEditing, setIsEditing] = useState(false);
-  const [editProfile, setEditProfile] = useState(profile);
-
-  const [achievements, setAchievements] = useState([
-    {
-      id: 1,
-      title: 'カープファン歴20年',
-      description: '20年以上カープを応援し続けています',
-      icon: Trophy,
-      color: 'text-yellow-600 bg-yellow-100'
-    },
-    {
-      id: 2,
-      title: 'スタジアム常連',
-      description: '100試合以上スタジアムで観戦',
-      icon: Star,
-      color: 'text-blue-600 bg-blue-100'
-    },
-    {
-      id: 3,
-      title: 'コミュニティリーダー',
-      description: '多くの投稿でいいねを獲得',
-      icon: Heart,
-      color: 'text-red-600 bg-red-100'
-    }
-  ]);
 
   const [recentActivity, setRecentActivity] = useState([
     {
@@ -68,24 +80,27 @@ export default function Profile() {
     {
       id: 2,
       type: 'like',
-      content: 'カープ女子の投稿にいいねしました',
+      content: 'ユナさんの投稿にいいねしました',
       time: '4時間前'
     },
     {
       id: 3,
       type: 'friend',
-      content: '赤ヘル太郎さんと友達になりました',
+      content: 'はやとさんと友達になりました',
       time: '1日前'
     }
   ]);
 
+  // 「保存」ボタンの処理（静的デモ用）
   const handleSaveProfile = () => {
     setProfile(editProfile);
+    setAchievements(editAchievements);
     setIsEditing(false);
   };
 
   const handleCancelEdit = () => {
     setEditProfile(profile);
+    setEditAchievements(achievements);
     setIsEditing(false);
   };
 
@@ -99,6 +114,11 @@ export default function Profile() {
     }
     return age;
   };
+
+  if (!profile) {
+    return <Layout><div className="text-center p-10">プロフィールデータの読み込みに失敗しました。</div></Layout>;
+  }
+
 
   return (
     <>
@@ -141,28 +161,28 @@ export default function Profile() {
             <div className="carp-card">
               <div className="carp-card-content text-center">
                 <MessageSquare className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold carp-text-red">{profile.postsCount}</p>
+                <p className="text-2xl font-bold carp-text-red">{profile.posts_count}</p>
                 <p className="text-sm text-gray-600">投稿数</p>
               </div>
             </div>
             <div className="carp-card">
               <div className="carp-card-content text-center">
                 <Users className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold carp-text-red">{profile.friendsCount}</p>
+                <p className="text-2xl font-bold carp-text-red">{profile.friends_count}</p>
                 <p className="text-sm text-gray-600">カープ仲間</p>
               </div>
             </div>
             <div className="carp-card">
               <div className="carp-card-content text-center">
                 <Heart className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold carp-text-red">{profile.likesReceived}</p>
+                <p className="text-2xl font-bold carp-text-red">{profile.likes_received}</p>
                 <p className="text-sm text-gray-600">いいね獲得</p>
               </div>
             </div>
             <div className="carp-card">
               <div className="carp-card-content text-center">
                 <Calendar className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold carp-text-red">{profile.attendanceCount}</p>
+                <p className="text-2xl font-bold carp-text-red">{profile.attendance_count}</p>
                 <p className="text-sm text-gray-600">観戦回数</p>
               </div>
             </div>
@@ -208,8 +228,8 @@ export default function Profile() {
                       <label className="carp-label">好きな選手</label>
                       <input
                         type="text"
-                        value={editProfile.favoritePlayer}
-                        onChange={(e) => setEditProfile({ ...editProfile, favoritePlayer: e.target.value })}
+                        value={editProfile.favorite_player}
+                        onChange={(e) => setEditProfile({ ...editProfile, favorite_player: e.target.value })}
                         className="carp-input"
                       />
                     </div>
@@ -242,11 +262,11 @@ export default function Profile() {
                     </div>
                     <div className="flex items-center space-x-3">
                       <Star className="h-5 w-5 text-gray-400" />
-                      <span className="text-gray-700">好きな選手: {profile.favoritePlayer}</span>
+                      <span className="text-gray-700">好きな選手: {profile.favorite_player}</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Heart className="h-5 w-5 text-gray-400" />
-                      <span className="text-gray-700">{profile.carpHistory}</span>
+                      <span className="text-gray-700">{profile.carp_history}</span>
                     </div>
                   </div>
                 )}
@@ -259,17 +279,54 @@ export default function Profile() {
                 <h2 className="text-lg font-semibold">実績・バッジ</h2>
               </div>
               <div className="carp-card-content space-y-4">
-                {achievements.map((achievement) => (
-                  <div key={achievement.id} className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg">
-                    <div className={`p-2 rounded-lg ${achievement.color}`}>
-                      <achievement.icon className="h-5 w-5" />
+                {isEditing ? (
+                  editAchievements.map((achievement, index) => (
+                    <div key={achievement.id} className="space-y-2 p-3 bg-red-50 rounded-lg">
+                      <div className="carp-form-group">
+                        <label className="carp-label">バッジ{index + 1} タイトル</label>
+                        <input
+                          type="text"
+                          value={achievement.title}
+                          onChange={(e) => {
+                            const newAchievements = [...editAchievements];
+                            newAchievements[index].title = e.target.value;
+                            setEditAchievements(newAchievements);
+                          }}
+                          className="carp-input"
+                        />
+                      </div>
+                      <div className="carp-form-group">
+                        <label className="carp-label">バッジ{index + 1} 説明</label>
+                        <input
+                          type="text"
+                          value={achievement.description}
+                          onChange={(e) => {
+                            const newAchievements = [...editAchievements];
+                            newAchievements[index].description = e.target.value;
+                            setEditAchievements(newAchievements);
+                          }}
+                          className="carp-input"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{achievement.title}</h3>
-                      <p className="text-sm text-gray-600">{achievement.description}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  achievements.map((achievement) => {
+                    const IconComponent = iconMap[achievement.icon];
+                    const colorClass = `text-${achievement.color}-600 bg-${achievement.color}-100`;
+                    return (
+                      <div key={achievement.id} className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg">
+                        <div className={`p-2 rounded-lg ${colorClass}`}>
+                          {IconComponent && <IconComponent className="h-5 w-5" />}
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">{achievement.title}</h3>
+                          <p className="text-sm text-gray-600">{achievement.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>

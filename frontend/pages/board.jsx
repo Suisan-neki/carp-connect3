@@ -18,7 +18,7 @@ export default function Board() {
   const [topics, setTopics] = useState([
     {
       id: '1',
-      author: 'マサト',
+      author: 'ケンタ',
       title: '今日の試合について語ろう！',
       content: '9回裏の逆転劇、本当に感動しました！みんなはどう思った？',
       created_at: '2025/08/12(月) 20:15:23.45',
@@ -28,7 +28,7 @@ export default function Board() {
     },
     {
       id: '4',
-      author: 'サヤカ',
+      author: 'ミユ',
       title: 'マツダスタジアムのおすすめグルメ',
       content: 'スタジアムで食べられる美味しいものを教えて！特にビールのおつまみが知りたいです🍺',
       created_at: '2025/08/12(月) 18:30:15.23',
@@ -38,7 +38,7 @@ export default function Board() {
     },
     {
       id: '6',
-      author: 'ケンタ',
+      author: 'タクミ',
       title: '来週の巨人戦、一緒に応援しませんか？',
       content: '来週の巨人戦のチケットを取りました！一緒に応援してくれる仲間を募集中です。',
       created_at: '2025/08/12(月) 16:45:08.91',
@@ -152,7 +152,7 @@ export default function Board() {
                   <div className="carp-form-group">
                     <label className="carp-label">内容</label>
                     <textarea
-                      value={newTopic.content}
+                      value={newTopic.content} 
                       onChange={(e) => setNewTopic({ ...newTopic, content: e.target.value })}
                       rows={4}
                       className="carp-input carp-textarea"

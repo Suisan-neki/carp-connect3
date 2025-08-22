@@ -271,8 +271,8 @@ Resources:
       Name: !Sub 'carp-connect-api-${Environment}'
       StageName: !Ref Environment
       Cors:
-        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
-        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowMethods: "GET,POST,PUT,DELETE,OPTIONS"
+        AllowHeaders: "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
         AllowOrigin: "'*'"
         MaxAge: 600
       Auth:

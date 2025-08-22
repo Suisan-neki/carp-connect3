@@ -9,6 +9,7 @@ export default function Welcome() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
       <div className="text-center py-12 px-4 sm:px-6 lg:px-8">
+        <img src="/logo.png" alt="Logo" className="mb-8 h-40 mx-auto" />
         <h1 className="text-5xl font-extrabold text-red-600 mb-4">カープコネクトへようこそ！</h1>
         <p className="text-xl text-gray-700 mb-8">
           下のボタンからログインまたは新規登録をして、カープファンと繋がりましょう！

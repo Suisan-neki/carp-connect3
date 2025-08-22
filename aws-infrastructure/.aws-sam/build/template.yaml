@@ -17,7 +17,7 @@ Parameters:
 Globals:
   Function:
     Timeout: 30
-    Runtime: python3.13
+    Runtime: python3.9
     Environment:
       Variables:
         ENVIRONMENT:
@@ -41,10 +41,10 @@ Resources:
       Description: Python dependencies for the Carp Connect API
       ContentUri: ..\..\..\backend\lambda_layer
       CompatibleRuntimes:
-      - python3.13
+      - python3.9
       LicenseInfo: MIT
       RetentionPolicy: Retain
-    BuildMethod: python3.13
+    BuildMethod: python3.9
   CarpConnectUserPool:
     Type: AWS::Cognito::UserPool
     Properties:

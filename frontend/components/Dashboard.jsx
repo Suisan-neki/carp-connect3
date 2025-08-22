@@ -21,27 +21,27 @@ export default function Dashboard() {
     totalPosts: 42,
     totalFriends: 18,
     upcomingGames: 3,
-    carpWins: 15
+    carpWins: 45
   });
 
   const [recentPosts, setRecentPosts] = useState([
     {
       id: 1,
-      author: '赤ヘル太郎',
+      author: 'ケンタ',
       content: '今日の試合、最高でした！9回裏の逆転劇に感動😭',
       time: '2時間前',
       likes: 24
     },
     {
       id: 2,
-      author: 'カープ女子',
+      author: 'ミユ',
       content: 'マツダスタジアムのビールが美味しすぎる🍺 みんなで乾杯したい！',
       time: '4時間前',
       likes: 18
     },
     {
       id: 3,
-      author: '広島っ子',
+      author: 'タクミ',
       content: '来週の巨人戦、一緒に応援してくれる人募集中！',
       time: '6時間前',
       likes: 31
@@ -51,23 +51,23 @@ export default function Dashboard() {
   const [upcomingGames, setUpcomingGames] = useState([
     {
       id: 1,
-      opponent: 'vs 阪神タイガース',
-      date: '2025年8月10日',
+      opponent: 'vs 中日ドラゴンズ',
+      date: '2025年8月22日',
       time: '18:00',
       venue: 'マツダスタジアム'
     },
     {
       id: 2,
-      opponent: 'vs 読売ジャイアンツ',
-      date: '2025年8月12日',
+      opponent: 'vs 中日ドラゴンズ',
+      date: '2025年8月23日',
       time: '18:00',
       venue: 'マツダスタジアム'
     },
     {
       id: 3,
       opponent: 'vs 中日ドラゴンズ',
-      date: '2025年8月15日',
-      time: '14:00',
+      date: '2025年8月24日',
+      time: '18:00',
       venue: 'マツダスタジアム'
     }
   ]);
